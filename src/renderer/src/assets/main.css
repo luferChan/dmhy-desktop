@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0F0F23;
+  --color-surface: #16162a;
+  --color-surface-2: #1e1e38;
+  --color-border: #2a2a4a;
+  --color-primary: #7C3AED;
+  --color-primary-light: #8B5CF6;
+  --color-secondary: #A78BFA;
+  --color-cta: #F43F5E;
+  --color-cta-light: #FB7185;
+  --color-text: #E2E8F0;
+  --color-text-muted: #94A3B8;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+
+  --font-sans: 'Noto Sans SC', 'Noto Sans JP', system-ui, sans-serif;
+  --font-serif: 'Noto Serif JP', Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #0F0F23;
+  color: #E2E8F0;
+  font-family: 'Noto Sans SC', 'Noto Sans JP', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #16162a;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a4a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7C3AED;
+}
+
+::selection {
+  background: #7C3AED44;
+  color: #E2E8F0;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+input, textarea {
+  user-select: text;
+}
