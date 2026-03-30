@@ -20,8 +20,12 @@ export default function SettingsPage(): React.JSX.Element {
 
   async function handleSave(): Promise<void> {
     if (!form) return
-    await window.api.settingsSave(form)
-    setSettings(form)
+    const toSave =
+      settings && form.downloadPath !== settings.downloadPath
+        ? { ...form, suppressDownloadPickerUntil: 0 }
+        : form
+    await window.api.settingsSave(toSave)
+    setSettings(toSave)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -150,7 +154,7 @@ export default function SettingsPage(): React.JSX.Element {
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#E2E8F0]">动漫花园</p>
-                <p className="text-xs text-[#475569]">v1.0.0</p>
+                <p className="text-xs text-[#475569]">v1.0.1</p>
               </div>
             </div>
             <div className="space-y-1 text-xs text-[#475569]">

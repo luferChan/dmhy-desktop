@@ -29,9 +29,9 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   })
 
   // ── Downloads ───────────────────────────────────────────────────────────
-  ipcMain.handle('download-add', async (_e, url: string, title?: string, size?: string, detailUrl?: string) => {
+  ipcMain.handle('download-add', async (_e, url: string, title?: string, size?: string, detailUrl?: string, savePath?: string) => {
     const settings = loadSettings()
-    const id = await downloader.add(url, settings.downloadPath, title, size)
+    const id = await downloader.add(url, savePath || settings.downloadPath, title, size)
     if (detailUrl) {
       // Background: fetch file list to get actual filename; don't block task creation
       const sizeOnly = /^\d+(\.\d+)?\s*(B|KB|MB|GB|TB|KiB|MiB|GiB|TiB)i?$/i

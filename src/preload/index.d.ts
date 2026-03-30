@@ -35,6 +35,8 @@ export interface DownloadTask {
   files: Array<{ name: string; length: number; progress: number }>
   eta: number
   addedAt: number
+  startedAt?: number
+  completedAt?: number
 }
 
 export interface AppSettings {
@@ -44,6 +46,8 @@ export interface AppSettings {
   seedAfterDownload: boolean
   searchHistory: string[]
   favoritePublishers: string[]
+  lastUsedDownloadPath: string
+  suppressDownloadPickerUntil: number
 }
 
 declare global {
@@ -55,7 +59,7 @@ declare global {
       copyText(text: string): Promise<boolean>
       openExternal(url: string): Promise<void>
       openPath(p: string): Promise<void>
-      downloadAdd(url: string, title?: string, size?: string, detailUrl?: string): Promise<string>
+      downloadAdd(url: string, title?: string, size?: string, detailUrl?: string, savePath?: string): Promise<string>
       downloadPause(id: string): Promise<void>
       downloadResume(id: string): Promise<void>
       downloadRemove(id: string, deleteFiles: boolean): Promise<void>

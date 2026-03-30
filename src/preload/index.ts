@@ -13,7 +13,7 @@ const api = {
   openPath: (p: string) => ipcRenderer.invoke('open-path', p),
 
   // Downloads
-  downloadAdd: (url: string, title?: string, size?: string, detailUrl?: string) => ipcRenderer.invoke('download-add', url, title, size, detailUrl),
+  downloadAdd: (url: string, title?: string, size?: string, detailUrl?: string, savePath?: string) => ipcRenderer.invoke('download-add', url, title, size, detailUrl, savePath),
   downloadPause: (id: string) => ipcRenderer.invoke('download-pause', id),
   downloadResume: (id: string) => ipcRenderer.invoke('download-resume', id),
   downloadRemove: (id: string, deleteFiles: boolean) =>

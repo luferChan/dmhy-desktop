@@ -33,6 +33,8 @@ export interface DownloadTask {
   files: Array<{ name: string; length: number; progress: number }>
   eta: number
   addedAt: number
+  startedAt?: number
+  completedAt?: number
 }
 
 export interface AppSettings {
