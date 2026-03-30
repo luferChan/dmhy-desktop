@@ -44,6 +44,8 @@ export interface AppSettings {
   seedAfterDownload: boolean
   searchHistory: string[]
   favoritePublishers: string[]
+  lastUsedDownloadPath: string
+  suppressDownloadPickerUntil: number
 }
 
 export const CATEGORIES = [
