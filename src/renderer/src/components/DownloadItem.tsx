@@ -150,7 +150,13 @@ export default function DownloadItem({ task }: Props): React.JSX.Element {
 
       {isCompleted && (
         <p className="ml-6 text-xs text-[#94A3B8]">
-          {formatBytes(task.total)} · {task.savePath}
+          {formatBytes(task.total)}
+          {task.startedAt && task.completedAt && (
+            <span className="ml-2 text-[#64748B]">
+              · 耗时 {formatEta(Math.round((task.completedAt - task.startedAt) / 1000))}
+            </span>
+          )}
+          {' · '}{task.savePath}
         </p>
       )}
 

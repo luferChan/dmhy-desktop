@@ -4,6 +4,7 @@ import { Search, Loader2, AlertCircle, ChevronDown } from 'lucide-react'
 import { useSearchStore, useDownloadStore, useUIStore } from '../store'
 import ResourceCard from '../components/ResourceCard'
 import PublisherFilter from '../components/PublisherFilter'
+import DownloadPathPicker from '../components/DownloadPathPicker'
 import { CATEGORIES } from '../types'
 
 export default function SearchPage(): React.JSX.Element {
@@ -27,6 +28,9 @@ export default function SearchPage(): React.JSX.Element {
   const { setPage } = useUIStore()
   const [inputValue, setInputValue] = useState(keyword)
   const [selectedCategory, setSelectedCategory] = useState(2)
+  const [pickerState, setPickerState] = useState<{
+    url: string; title: string; size: string; detailUrl: string; path: string
+  } | null>(null)
 
   const doSearch = useCallback(
     async (kw: string, p: number, sid: number, teamId?: string, append = false) => {
@@ -84,12 +88,39 @@ export default function SearchPage(): React.JSX.Element {
   }
 
   async function handleDownload(url: string, title: string, size: string, detailUrl: string): Promise<void> {
-    await window.api.downloadAdd(url, title, size, detailUrl)
+    const settings = await window.api.settingsGet()
+    const effectivePath = settings.lastUsedDownloadPath || settings.downloadPath
+
+    if (settings.suppressDownloadPickerUntil > Date.now()) {
+      await window.api.downloadAdd(url, title, size, detailUrl, effectivePath)
+      setPage('downloads')
+      return
+    }
+
+    setPickerState({ url, title, size, detailUrl, path: effectivePath })
+  }
+
+  async function handlePickerConfirm(path: string, suppress: boolean): Promise<void> {
+    const settings = await window.api.settingsGet()
+    await window.api.settingsSave({
+      ...settings,
+      lastUsedDownloadPath: path,
+      suppressDownloadPickerUntil: suppress ? Date.now() + 7 * 24 * 60 * 60 * 1000 : 0
+    })
+    await window.api.downloadAdd(pickerState!.url, pickerState!.title, pickerState!.size, pickerState!.detailUrl, path)
+    setPickerState(null)
     setPage('downloads')
   }
 
   return (
     <div className="flex flex-col h-full">
+      {pickerState && (
+        <DownloadPathPicker
+          defaultPath={pickerState.path}
+          onConfirm={handlePickerConfirm}
+          onCancel={() => setPickerState(null)}
+        />
+      )}
       {/* Search bar */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-[#2a2a4a] bg-[#16162a] shrink-0">
         <div className="flex-1 flex items-center gap-2 bg-[#0F0F23] border border-[#2a2a4a] rounded-xl px-3 py-2 focus-within:border-[#7C3AED] transition-colors duration-150">

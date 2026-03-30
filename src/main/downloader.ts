@@ -36,6 +36,8 @@ export interface DownloadTask {
   files: Array<{ name: string; length: number; progress: number }>
   eta: number
   addedAt: number
+  startedAt?: number
+  completedAt?: number
 }
 
 const RPC_PORT = 16800
@@ -399,6 +401,7 @@ class Downloader extends EventEmitter {
           task.status = 'seeding'
         } else {
           task.status = 'downloading'
+          if (!task.startedAt) task.startedAt = Date.now()
         }
         break
       case 'waiting':
@@ -417,6 +420,7 @@ class Downloader extends EventEmitter {
         task.status = 'completed'
         task.progress = 100
         task.downloadSpeed = 0
+        if (!task.completedAt) task.completedAt = Date.now()
         break
     }
 

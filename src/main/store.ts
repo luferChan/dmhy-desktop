@@ -9,6 +9,8 @@ export interface AppSettings {
   seedAfterDownload: boolean
   searchHistory: string[]
   favoritePublishers: string[]
+  lastUsedDownloadPath: string
+  suppressDownloadPickerUntil: number
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -17,7 +19,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   proxyUrl: '',
   seedAfterDownload: false,
   searchHistory: [],
-  favoritePublishers: []
+  favoritePublishers: [],
+  lastUsedDownloadPath: '',
+  suppressDownloadPickerUntil: 0
 }
 
 function getStorePath(): string {
