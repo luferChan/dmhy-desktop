@@ -62,38 +62,30 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     return downloader.getTasks()
   })
 
+  const send = (channel: string, data?: unknown): void => {
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send(channel, data)
+  }
+
   // Forward main-process logs to renderer; buffer until renderer is ready
   const pendingLogs: string[] = []
   let rendererReady = false
   mainWindow.webContents.once('did-finish-load', () => {
     rendererReady = true
-    for (const msg of pendingLogs) mainWindow.webContents.send('main:log', msg)
+    for (const msg of pendingLogs) send('main:log', msg)
     pendingLogs.length = 0
   })
   downloader.on('log', (msg: string) => {
-    if (rendererReady) mainWindow.webContents.send('main:log', msg)
+    if (rendererReady) send('main:log', msg)
     else pendingLogs.push(msg)
   })
 
   // Forward download events to renderer
-  downloader.on('task-added', (task) => {
-    mainWindow.webContents.send('download:task-added', task)
-  })
-  downloader.on('task-updated', (task) => {
-    mainWindow.webContents.send('download:task-updated', task)
-  })
-  downloader.on('task-progress', (data) => {
-    mainWindow.webContents.send('download:task-progress', data)
-  })
-  downloader.on('task-completed', (task) => {
-    mainWindow.webContents.send('download:task-completed', task)
-  })
-  downloader.on('task-error', (data) => {
-    mainWindow.webContents.send('download:task-error', data)
-  })
-  downloader.on('task-removed', (data) => {
-    mainWindow.webContents.send('download:task-removed', data)
-  })
+  downloader.on('task-added', (task) => { send('download:task-added', task) })
+  downloader.on('task-updated', (task) => { send('download:task-updated', task) })
+  downloader.on('task-progress', (data) => { send('download:task-progress', data) })
+  downloader.on('task-completed', (task) => { send('download:task-completed', task) })
+  downloader.on('task-error', (data) => { send('download:task-error', data) })
+  downloader.on('task-removed', (data) => { send('download:task-removed', data) })
 
   // ── Window controls ──────────────────────────────────────────────────────
   ipcMain.handle('window-minimize', () => { mainWindow.minimize() })
