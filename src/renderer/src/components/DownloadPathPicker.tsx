@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Folder, FolderOpen } from 'lucide-react'
+import { Folder, FolderOpen, Leaf } from 'lucide-react'
 
 interface Props {
   defaultPath: string
@@ -25,58 +25,66 @@ export default function DownloadPathPicker({ defaultPath, onConfirm, onCancel }:
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#31332f]/20 backdrop-blur-sm"
       onClick={onCancel}
     >
       <div
-        className="w-[380px] rounded-2xl bg-[#1a1a2e] border border-[#2a2a4a] shadow-2xl p-5 flex flex-col gap-4"
+        className="w-[400px] rounded-2xl bg-white/95 backdrop-blur-xl border border-[#b2b2ad]/20 shadow-[0_40px_60px_-15px_rgba(49,51,47,0.12)] p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          <Folder size={18} className="text-[#A78BFA] shrink-0" />
-          <span className="text-sm font-semibold text-[#E2E8F0]">选择下载目录</span>
+        {/* 标题 */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-[#d4e9c3] flex items-center justify-center shrink-0">
+            <Folder size={16} className="text-[#526446]" />
+          </div>
+          <div>
+            <h3 className="font-headline text-sm font-bold text-[#31332f]">选择下载目录</h3>
+            <p className="text-[11px] text-[#7a7b76] mt-0.5">确认后开始下载</p>
+          </div>
         </div>
 
-        {/* Path display */}
-        <div className="flex items-center gap-2 bg-[#0F0F23] border border-[#2a2a4a] rounded-xl px-3 py-2">
-          <FolderOpen size={14} className="text-[#7C3AED] shrink-0" />
-          <span
-            className="flex-1 text-xs text-[#94A3B8] truncate"
-            title={path}
-          >
+        {/* 路径展示 */}
+        <div className="flex items-center gap-2 bg-[#f5f4ef] rounded-xl px-4 py-2.5">
+          <FolderOpen size={13} className="text-[#526446] shrink-0" />
+          <span className="flex-1 text-xs text-[#5e605b] truncate" title={path}>
             {truncatePath(path)}
           </span>
           <button
             onClick={handleChangePath}
-            className="text-xs text-[#A78BFA] hover:text-[#E2E8F0] transition-colors duration-150 shrink-0 cursor-pointer"
+            className="text-xs font-semibold text-[#526446] hover:text-[#47583b] transition-colors duration-150 shrink-0 cursor-pointer"
           >
             更换目录
           </button>
         </div>
 
-        {/* Suppress checkbox */}
-        <label className="flex items-center gap-2 cursor-pointer select-none">
+        {/* 7天不再询问 */}
+        <label className="flex items-center gap-2.5 cursor-pointer select-none px-1">
           <input
             type="checkbox"
             checked={suppress}
             onChange={(e) => setSuppress(e.target.checked)}
-            className="w-3.5 h-3.5 accent-[#7C3AED] cursor-pointer"
+            className="w-3.5 h-3.5 accent-[#526446] cursor-pointer rounded"
           />
-          <span className="text-xs text-[#94A3B8]">7天内不再询问</span>
+          <span className="text-xs text-[#5e605b]">7天内不再询问</span>
         </label>
 
-        {/* Buttons */}
+        {/* 提示 */}
+        <div className="flex items-center gap-2 p-3 bg-[#f6fed3]/50 rounded-xl">
+          <Leaf size={13} className="text-[#5b6242] shrink-0" />
+          <p className="text-[11px] text-[#5b6242]">下载完成后可在「下载管理」中找到文件。</p>
+        </div>
+
+        {/* 按钮 */}
         <div className="flex gap-2 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-1.5 rounded-lg text-sm text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-[#2a2a4a] transition-colors duration-150 cursor-pointer"
+            className="px-5 py-2 rounded-full text-sm text-[#5e605b] hover:text-[#31332f] hover:bg-[#f5f4ef] transition-colors duration-150 cursor-pointer"
           >
             取消
           </button>
           <button
             onClick={() => onConfirm(path, suppress)}
-            className="px-4 py-1.5 rounded-lg text-sm font-medium bg-[#7C3AED] text-white hover:bg-[#8B5CF6] transition-colors duration-150 cursor-pointer"
+            className="px-5 py-2 rounded-full text-sm font-semibold bg-[#526446] text-white hover:bg-[#47583b] transition-colors duration-200 cursor-pointer shadow-sm"
           >
             开始下载
           </button>

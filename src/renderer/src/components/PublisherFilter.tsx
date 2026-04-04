@@ -17,7 +17,6 @@ export default function PublisherFilter({
 }: Props): React.JSX.Element | null {
   const { favoritePublishers, toggleFavoritePublisher } = useSearchStore()
 
-  // Build publisher map: name → teamId, count
   const publisherMap = new Map<string, { teamId: string; count: number }>()
   for (const r of resources) {
     if (r.publisher && r.teamId) {
@@ -29,7 +28,6 @@ export default function PublisherFilter({
 
   if (publisherMap.size === 0) return null
 
-  // Sort: favorites first, then by count
   const publishers = Array.from(publisherMap.entries()).sort((a, b) => {
     const aFav = favoritePublishers.includes(a[0]) ? 1 : 0
     const bFav = favoritePublishers.includes(b[0]) ? 1 : 0
@@ -38,9 +36,8 @@ export default function PublisherFilter({
   })
 
   return (
-    <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-[#2a2a4a]">
-      <span className="text-xs text-[#94A3B8] shrink-0">字幕组</span>
-
+    <div className="flex flex-wrap items-center gap-2 px-8 py-2 border-b border-[#efeee9]">
+      <span className="text-[10px] font-bold text-[#7a7b76] uppercase tracking-wider shrink-0">字幕组</span>
       <div className="flex flex-wrap gap-1.5">
         {publishers.map(([name, { teamId, count }]) => {
           const isSelected = activeTeamId === teamId
@@ -50,26 +47,25 @@ export default function PublisherFilter({
             <div key={name} className="flex items-center gap-0.5">
               <button
                 onClick={() => onSelectTeam(teamId, name)}
-                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer border
-                  ${
-                    isSelected
-                      ? 'bg-[#7C3AED] border-[#7C3AED] text-white shadow-sm shadow-[#7C3AED44]'
-                      : 'bg-transparent border-[#2a2a4a] text-[#94A3B8] hover:border-[#7C3AED88] hover:text-[#E2E8F0]'
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer
+                  ${isSelected
+                    ? 'bg-[#526446] text-white shadow-sm'
+                    : 'bg-[#f5f4ef] text-[#5e605b] hover:bg-[#e9e8e3] hover:text-[#31332f]'
                   }`}
               >
-                {isFav && <Star size={10} className="fill-current text-[#F59E0B]" />}
+                {isFav && <Star size={9} className="fill-current text-[#c67c2a]" />}
                 {name}
-                <span className={`text-[10px] ${isSelected ? 'text-[#c4b5fd]' : 'text-[#475569]'}`}>
+                <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-[#b2b2ad]'}`}>
                   {count}
                 </span>
               </button>
               <button
                 onClick={() => toggleFavoritePublisher(name)}
                 title={isFav ? '取消收藏' : '收藏字幕组'}
-                className={`p-0.5 rounded transition-colors duration-150 cursor-pointer
-                  ${isFav ? 'text-[#F59E0B]' : 'text-[#475569] hover:text-[#94A3B8]'}`}
+                className={`p-0.5 rounded-full transition-colors duration-150 cursor-pointer
+                  ${isFav ? 'text-[#c67c2a]' : 'text-[#b2b2ad] hover:text-[#7a7b76]'}`}
               >
-                <Star size={10} className={isFav ? 'fill-current' : ''} />
+                <Star size={9} className={isFav ? 'fill-current' : ''} />
               </button>
             </div>
           )

@@ -48,7 +48,6 @@ export default function SearchPage(): React.JSX.Element {
     [setLoading, setError, setResults]
   )
 
-  // Load latest on first open
   useEffect(() => {
     if (results.length === 0) {
       doSearch('', 1, selectedCategory)
@@ -121,40 +120,43 @@ export default function SearchPage(): React.JSX.Element {
           onCancel={() => setPickerState(null)}
         />
       )}
-      {/* Search bar */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#2a2a4a] bg-[#16162a] shrink-0">
-        <div className="flex-1 flex items-center gap-2 bg-[#0F0F23] border border-[#2a2a4a] rounded-xl px-3 py-2 focus-within:border-[#7C3AED] transition-colors duration-150">
-          <Search size={16} className="text-[#94A3B8] shrink-0" />
-          <input
-            type="text"
-            placeholder="输入番剧名称搜索..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent text-sm text-[#E2E8F0] placeholder-[#475569] outline-none"
-          />
-          {loading && <Loader2 size={14} className="text-[#7C3AED] animate-spin shrink-0" />}
-        </div>
-        <button
-          onClick={handleSearch}
-          disabled={loading || !inputValue.trim()}
-          className="px-4 py-2 rounded-xl bg-[#7C3AED] text-white text-sm font-medium hover:bg-[#8B5CF6] transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-        >
-          搜索
-        </button>
-      </div>
 
-      {/* Category filter */}
-      <div className="drag-region flex items-center gap-1.5 px-4 py-2 border-b border-[#2a2a4a] shrink-0 overflow-x-auto">
+      {/* 粘性顶栏 */}
+      <header className="sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
+        <h2 className="font-headline text-lg font-bold text-[#526446]">资源检索</h2>
+        <div className="flex items-center gap-3">
+          <div className="relative flex items-center bg-white border border-[#b2b2ad]/30 rounded-full px-4 py-2 focus-within:border-[#526446]/40 focus-within:shadow-[0_0_0_3px_rgba(82,100,70,0.08)] transition-all duration-200 w-64">
+            <Search size={14} className="text-[#7a7b76] shrink-0 mr-2" />
+            <input
+              type="text"
+              placeholder="搜寻番剧、漫画或音乐..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1 bg-transparent text-sm text-[#31332f] placeholder-[#b2b2ad] outline-none"
+            />
+            {loading && <Loader2 size={13} className="text-[#526446] animate-spin ml-2 shrink-0" />}
+          </div>
+          <button
+            onClick={handleSearch}
+            disabled={loading || !inputValue.trim()}
+            className="px-5 py-2 rounded-full bg-[#526446] text-white text-xs font-bold hover:bg-[#47583b] transition-colors duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          >
+            搜索
+          </button>
+        </div>
+      </header>
+
+      {/* 分类筛选 */}
+      <div className="flex items-center gap-2 px-8 py-3 shrink-0 overflow-x-auto">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => handleCategoryChange(cat.id)}
-            className={`no-drag px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-150 cursor-pointer border
-              ${
-                selectedCategory === cat.id
-                  ? 'bg-[#7C3AED] border-[#7C3AED] text-white'
-                  : 'bg-transparent border-[#2a2a4a] text-[#94A3B8] hover:border-[#7C3AED88] hover:text-[#E2E8F0]'
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer
+              ${selectedCategory === cat.id
+                ? 'bg-[#526446] text-white shadow-sm'
+                : 'bg-[#f5f4ef] text-[#5e605b] hover:bg-[#e9e8e3] hover:text-[#31332f]'
               }`}
           >
             {cat.label}
@@ -162,7 +164,7 @@ export default function SearchPage(): React.JSX.Element {
         ))}
       </div>
 
-      {/* Publisher filter */}
+      {/* 字幕组筛选 */}
       {results.length > 0 && (
         <PublisherFilter
           resources={results}
@@ -172,28 +174,30 @@ export default function SearchPage(): React.JSX.Element {
         />
       )}
 
-      {/* Results */}
-      <div className="flex-1 overflow-y-auto">
+      {/* 结果列表 */}
+      <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8">
         {error && (
-          <div className="flex items-center gap-2 mx-4 my-3 p-3 rounded-xl bg-[#F43F5E11] border border-[#F43F5E33] text-sm text-[#F43F5E]">
-            <AlertCircle size={16} className="shrink-0" />
+          <div className="flex items-center gap-2 mx-2 mb-4 p-3 rounded-xl bg-[#a73b21]/8 border border-[#a73b21]/20 text-sm text-[#a73b21]">
+            <AlertCircle size={15} className="shrink-0" />
             {error}
           </div>
         )}
 
         {!loading && !error && results.length === 0 && keyword && (
-          <div className="flex flex-col items-center justify-center h-full text-[#475569] gap-2">
+          <div className="flex flex-col items-center justify-center h-full text-[#b2b2ad] gap-3">
             <Search size={40} className="opacity-30" />
             <p className="text-sm">未找到相关资源</p>
           </div>
         )}
 
-        {results.map((r) => (
-          <ResourceCard key={r.id} resource={r} onDownload={handleDownload} />
-        ))}
+        <div className="grid grid-cols-2 gap-3">
+          {results.map((r) => (
+            <ResourceCard key={r.id} resource={r} onDownload={handleDownload} />
+          ))}
+        </div>
 
         {activeTeamId && results.length === 0 && !loading && (
-          <div className="flex items-center justify-center py-8 text-sm text-[#475569]">
+          <div className="flex items-center justify-center py-8 text-sm text-[#b2b2ad]">
             该字幕组暂无相关资源
           </div>
         )}
@@ -201,26 +205,28 @@ export default function SearchPage(): React.JSX.Element {
         {hasMore && !loading && (
           <button
             onClick={handleLoadMore}
-            className="flex items-center justify-center gap-2 w-full py-3 text-sm text-[#94A3B8] hover:text-[#E2E8F0] hover:bg-[#16162a] transition-colors duration-150 cursor-pointer"
+            className="flex items-center justify-center gap-2 w-full py-4 mt-2 text-sm text-[#7a7b76] hover:text-[#31332f] hover:bg-[#f5f4ef] rounded-xl transition-colors duration-150 cursor-pointer"
           >
-            <ChevronDown size={16} />
+            <ChevronDown size={15} />
             加载更多
           </button>
         )}
 
         {loading && results.length > 0 && (
           <div className="flex items-center justify-center py-4">
-            <Loader2 size={20} className="text-[#7C3AED] animate-spin" />
+            <Loader2 size={18} className="text-[#526446] animate-spin" />
           </div>
         )}
       </div>
 
-      {/* Results count */}
+      {/* 状态栏 */}
       {results.length > 0 && (
-        <div className="px-4 py-2 border-t border-[#2a2a4a] bg-[#16162a] text-xs text-[#475569] shrink-0">
-          {keyword ? `"${keyword}" ` : '最新動畫 '}
-          共 {results.length} 条
-          {activeTeamName && ` · ${activeTeamName}`}
+        <div className="px-8 py-2 text-[10px] text-[#b2b2ad] font-medium shrink-0 flex items-center justify-between border-t border-[#efeee9]">
+          <span>
+            {keyword ? `"${keyword}" · ` : '最新動畫 · '}
+            {results.length} 条结果
+            {activeTeamName && ` · ${activeTeamName}`}
+          </span>
         </div>
       )}
     </div>
