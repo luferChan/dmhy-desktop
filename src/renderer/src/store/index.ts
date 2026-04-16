@@ -11,6 +11,7 @@ interface SearchState {
   activeTeamId: string | null
   activeTeamName: string | null
   favoritePublishers: string[]
+  publisherSnapshot: Array<[string, { teamId: string; count: number }]>
   setKeyword: (k: string) => void
   setResults: (r: Resource[], page: number, hasMore: boolean, append: boolean) => void
   setLoading: (v: boolean) => void
@@ -19,6 +20,7 @@ interface SearchState {
   clearTeamFilter: () => void
   setFavoritePublishers: (list: string[]) => void
   toggleFavoritePublisher: (p: string) => void
+  updatePublisherSnapshot: (resources: Resource[], append: boolean) => void
 }
 
 interface DownloadState {
@@ -45,6 +47,7 @@ export const useSearchStore = create<SearchState>((set) => ({
   activeTeamId: null,
   activeTeamName: null,
   favoritePublishers: [],
+  publisherSnapshot: [],
 
   setKeyword: (keyword) => set({ keyword }),
   setResults: (resources, page, hasMore, append) =>
@@ -64,6 +67,18 @@ export const useSearchStore = create<SearchState>((set) => ({
         ? s.favoritePublishers.filter((x) => x !== p)
         : [...s.favoritePublishers, p]
       return { favoritePublishers: list }
+    }),
+  updatePublisherSnapshot: (resources, append) =>
+    set((s) => {
+      const map = new Map<string, { teamId: string; count: number }>(append ? s.publisherSnapshot : [])
+      for (const r of resources) {
+        if (r.publisher && r.teamId) {
+          const existing = map.get(r.publisher)
+          if (existing) existing.count++
+          else map.set(r.publisher, { teamId: r.teamId, count: 1 })
+        }
+      }
+      return { publisherSnapshot: Array.from(map.entries()) }
     })
 }))
 

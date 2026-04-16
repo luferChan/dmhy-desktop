@@ -1,34 +1,22 @@
 import React from 'react'
 import { Star } from 'lucide-react'
 import { useSearchStore } from '../store'
-import type { Resource } from '../types'
 
 interface Props {
-  resources: Resource[]
   activeTeamId: string | null
   activeTeamName: string | null
   onSelectTeam: (teamId: string, name: string) => void
 }
 
 export default function PublisherFilter({
-  resources,
   activeTeamId,
   onSelectTeam
 }: Props): React.JSX.Element | null {
-  const { favoritePublishers, toggleFavoritePublisher } = useSearchStore()
+  const { favoritePublishers, toggleFavoritePublisher, publisherSnapshot } = useSearchStore()
 
-  const publisherMap = new Map<string, { teamId: string; count: number }>()
-  for (const r of resources) {
-    if (r.publisher && r.teamId) {
-      const existing = publisherMap.get(r.publisher)
-      if (existing) existing.count++
-      else publisherMap.set(r.publisher, { teamId: r.teamId, count: 1 })
-    }
-  }
+  if (publisherSnapshot.length === 0) return null
 
-  if (publisherMap.size === 0) return null
-
-  const publishers = Array.from(publisherMap.entries()).sort((a, b) => {
+  const publishers = [...publisherSnapshot].sort((a, b) => {
     const aFav = favoritePublishers.includes(a[0]) ? 1 : 0
     const bFav = favoritePublishers.includes(b[0]) ? 1 : 0
     if (aFav !== bFav) return bFav - aFav

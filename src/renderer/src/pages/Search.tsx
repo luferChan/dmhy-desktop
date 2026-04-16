@@ -1,6 +1,6 @@
 import React from 'react'
-import { useState, useCallback, useEffect } from 'react'
-import { Search, Loader2, AlertCircle, ChevronDown } from 'lucide-react'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { Search, Loader2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { useSearchStore, useDownloadStore, useUIStore } from '../store'
 import ResourceCard from '../components/ResourceCard'
 import PublisherFilter from '../components/PublisherFilter'
@@ -17,12 +17,14 @@ export default function SearchPage(): React.JSX.Element {
     error,
     activeTeamId,
     activeTeamName,
+    publisherSnapshot,
     setKeyword,
     setResults,
     setLoading,
     setError,
     setTeamFilter,
-    clearTeamFilter
+    clearTeamFilter,
+    updatePublisherSnapshot
   } = useSearchStore()
   useDownloadStore()
   const { setPage } = useUIStore()
@@ -31,6 +33,8 @@ export default function SearchPage(): React.JSX.Element {
   const [pickerState, setPickerState] = useState<{
     url: string; title: string; size: string; detailUrl: string; path: string
   } | null>(null)
+  const [showBackToTop, setShowBackToTop] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const doSearch = useCallback(
     async (kw: string, p: number, sid: number, teamId?: string, append = false) => {
@@ -39,13 +43,16 @@ export default function SearchPage(): React.JSX.Element {
       try {
         const res = await window.api.search(kw, p, sid, teamId)
         setResults(res.resources, res.page, res.hasMore, append)
+        if (!teamId) {
+          updatePublisherSnapshot(res.resources, append)
+        }
       } catch (e: unknown) {
         setError((e as Error).message || '搜索失败，请重试')
       } finally {
         setLoading(false)
       }
     },
-    [setLoading, setError, setResults]
+    [setLoading, setError, setResults, updatePublisherSnapshot]
   )
 
   useEffect(() => {
@@ -56,7 +63,6 @@ export default function SearchPage(): React.JSX.Element {
 
   function handleSearch(): void {
     const kw = inputValue.trim()
-    if (!kw) return
     setKeyword(kw)
     clearTeamFilter()
     doSearch(kw, 1, selectedCategory)
@@ -99,6 +105,16 @@ export default function SearchPage(): React.JSX.Element {
     setPickerState({ url, title, size, detailUrl, path: effectivePath })
   }
 
+  function handleScroll(): void {
+    if (scrollRef.current) {
+      setShowBackToTop(scrollRef.current.scrollTop > 300)
+    }
+  }
+
+  function scrollToTop(): void {
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   async function handlePickerConfirm(path: string, suppress: boolean): Promise<void> {
     const settings = await window.api.settingsGet()
     await window.api.settingsSave({
@@ -139,7 +155,7 @@ export default function SearchPage(): React.JSX.Element {
           </div>
           <button
             onClick={handleSearch}
-            disabled={loading || !inputValue.trim()}
+            disabled={loading}
             className="px-5 py-2 rounded-full bg-[#526446] text-white text-xs font-bold hover:bg-[#47583b] transition-colors duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
             搜索
@@ -165,9 +181,8 @@ export default function SearchPage(): React.JSX.Element {
       </div>
 
       {/* 字幕组筛选 */}
-      {results.length > 0 && (
+      {publisherSnapshot.length > 0 && (
         <PublisherFilter
-          resources={results}
           activeTeamId={activeTeamId}
           activeTeamName={activeTeamName}
           onSelectTeam={handleTeamFilter}
@@ -175,7 +190,8 @@ export default function SearchPage(): React.JSX.Element {
       )}
 
       {/* 结果列表 */}
-      <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8">
+      <div className="flex-1 min-h-0 relative">
+      <div ref={scrollRef} onScroll={handleScroll} className="h-full overflow-y-auto px-6 pt-2 pb-8">
         {error && (
           <div className="flex items-center gap-2 mx-2 mb-4 p-3 rounded-xl bg-[#a73b21]/8 border border-[#a73b21]/20 text-sm text-[#a73b21]">
             <AlertCircle size={15} className="shrink-0" />
@@ -217,6 +233,16 @@ export default function SearchPage(): React.JSX.Element {
             <Loader2 size={18} className="text-[#526446] animate-spin" />
           </div>
         )}
+      </div>
+
+      {/* 回到顶部 */}
+      <button
+        onClick={scrollToTop}
+        className={`absolute bottom-6 right-6 w-9 h-9 flex items-center justify-center rounded-full bg-[#526446] text-white shadow-md transition-all duration-200 cursor-pointer hover:bg-[#47583b] hover:scale-105
+          ${showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}
+      >
+        <ChevronUp size={16} />
+      </button>
       </div>
 
       {/* 状态栏 */}
