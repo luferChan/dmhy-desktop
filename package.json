@@ -1,6 +1,6 @@
 {
   "name": "dmhy-desktop",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "lufer.chen",
@@ -17,7 +17,7 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
-    "build:mac": "npm run build && electron-builder --mac",
+    "build:mac": "npm run build && electron-builder --mac --x64 && electron-builder --mac --arm64",
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
@@ -35,6 +35,7 @@
     "copyright": "Copyright © 2026",
     "npmRebuild": false,
     "afterPack": "./scripts/afterPack.js",
+    "afterSign": "./scripts/afterSign.js",
     "files": [
       "out/**/*",
       "resources/**/*"
@@ -115,7 +116,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
-    "electron": "^39.2.6",
+    "electron": "^39.8.8",
     "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
     "eslint": "^9.39.1",

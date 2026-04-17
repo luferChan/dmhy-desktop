@@ -138,9 +138,9 @@ export default function SearchPage(): React.JSX.Element {
       )}
 
       {/* 粘性顶栏 */}
-      <header className="sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
+      <header className="drag-region sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
         <h2 className="font-headline text-lg font-bold text-[#526446]">资源检索</h2>
-        <div className="flex items-center gap-3">
+        <div className="no-drag flex items-center gap-3">
           <div className="relative flex items-center bg-white border border-[#b2b2ad]/30 rounded-full px-4 py-2 focus-within:border-[#526446]/40 focus-within:shadow-[0_0_0_3px_rgba(82,100,70,0.08)] transition-all duration-200 w-64">
             <Search size={14} className="text-[#7a7b76] shrink-0 mr-2" />
             <input

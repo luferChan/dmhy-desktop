@@ -17,7 +17,7 @@ export default function DownloadsPage(): React.JSX.Element {
   return (
     <div className="flex flex-col h-full">
       {/* 粘性顶栏 */}
-      <header className="sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
+      <header className="drag-region sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
           <h2 className="font-headline text-lg font-bold text-[#526446]">下载管理</h2>
           {taskList.length > 0 && (
@@ -44,11 +44,12 @@ export default function DownloadsPage(): React.JSX.Element {
         {taskList.length > 0 && (
           <div className="mx-6 mt-2 mb-8 bg-white rounded-2xl overflow-hidden shadow-[0_4px_40px_-8px_rgba(49,51,47,0.06)] border border-[#b2b2ad]/10">
             {/* 表头 */}
-            <div className="flex items-center px-6 py-3 bg-[#f5f4ef]/50">
-              <div className="flex-1 min-w-0 text-[10px] font-bold text-[#7a7b76] uppercase tracking-widest">文件名</div>
-              <div className="w-20 text-right text-[10px] font-bold text-[#7a7b76] uppercase tracking-widest shrink-0">大小</div>
-              <div className="w-28 text-right text-[10px] font-bold text-[#7a7b76] uppercase tracking-widest shrink-0">状态</div>
-              <div className="w-16 shrink-0" />
+            <div className="grid items-center px-6 py-3 bg-[#f5f4ef]/50" style={{ gridTemplateColumns: '20px 1fr 80px 96px 64px', columnGap: '12px' }}>
+              <div />
+              <div className="text-[10px] font-bold text-[#7a7b76] uppercase tracking-widest">文件名</div>
+              <div className="text-right text-[10px] font-bold text-[#7a7b76] uppercase tracking-widest">大小</div>
+              <div className="text-right text-[10px] font-bold text-[#7a7b76] uppercase tracking-widest">状态</div>
+              <div />
             </div>
 
             {active.length > 0 && (

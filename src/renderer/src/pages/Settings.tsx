@@ -41,7 +41,7 @@ export default function SettingsPage(): React.JSX.Element {
   return (
     <div className="flex flex-col h-full">
       {/* 粘性顶栏 */}
-      <header className="sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
+      <header className="drag-region sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
         <h2 className="font-headline text-lg font-bold text-[#526446]">设置</h2>
         <Settings size={18} className="text-[#b2b2ad]" />
       </header>
@@ -185,7 +185,7 @@ export default function SettingsPage(): React.JSX.Element {
           <div className="flex-1 space-y-3">
             <div className="flex items-end gap-3">
               <h3 className="font-headline text-2xl font-black text-[#526446]">动漫花园</h3>
-              <span className="text-sm text-[#7a7b76] pb-1">v1.0.2</span>
+              <span className="text-sm text-[#7a7b76] pb-1">v1.0.4</span>
             </div>
             <p className="text-[#5e605b] text-sm leading-relaxed">
               面向动漫爱好者的现代化种子下载客户端，让每一份番剧资源触手可得。

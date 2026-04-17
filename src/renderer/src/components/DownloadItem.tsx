@@ -40,9 +40,9 @@ export default function DownloadItem({ task }: Props): React.JSX.Element {
   const isWaiting = task.status === 'waiting'
 
   return (
-    <div className="group flex items-center px-6 py-4 border-b border-[#efeee9] last:border-0 hover:bg-[#f5f4ef]/40 transition-colors duration-150">
+    <div className="group grid items-center px-6 py-4 border-b border-[#efeee9] last:border-0 hover:bg-[#f5f4ef]/40 transition-colors duration-150" style={{ gridTemplateColumns: '20px 1fr 80px 96px 64px', columnGap: '12px' }}>
       {/* 状态图标 */}
-      <div className="w-5 shrink-0 mr-3 flex items-center justify-center">
+      <div className="flex items-center justify-center">
         {isCompleted && <CheckCircle2 size={16} className="text-[#526446]" />}
         {isError && <AlertCircle size={16} className="text-[#a73b21]" />}
         {isWaiting && <Loader2 size={16} className="text-[#b2b2ad] animate-spin" />}
@@ -52,7 +52,7 @@ export default function DownloadItem({ task }: Props): React.JSX.Element {
       </div>
 
       {/* 名称 + 进度 */}
-      <div className="flex-1 min-w-0 mr-4">
+      <div className="min-w-0">
         <p className="text-sm font-medium text-[#31332f] truncate" title={task.name}>
           {task.name}
         </p>
@@ -73,7 +73,6 @@ export default function DownloadItem({ task }: Props): React.JSX.Element {
                   <span className="text-[#526446] font-medium">{formatSpeed(task.downloadSpeed)}</span>
                 )}
                 {isActive && task.eta > 0 && <span>{formatEta(task.eta)}</span>}
-                <span className="font-medium">{task.progress}%</span>
               </span>
             </div>
           </div>
@@ -101,12 +100,12 @@ export default function DownloadItem({ task }: Props): React.JSX.Element {
       </div>
 
       {/* 文件大小 */}
-      <div className="w-20 text-right text-xs text-[#7a7b76] shrink-0">
+      <div className="text-right text-xs text-[#7a7b76]">
         {task.total > 0 ? formatBytes(task.total) : '—'}
       </div>
 
       {/* 状态标签 */}
-      <div className="w-24 flex justify-end shrink-0 mr-2">
+      <div className="flex justify-end">
         {isActive && (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#d4e9c3] text-[#45573a] text-[10px] font-bold">
             <span className="w-1.5 h-1.5 rounded-full bg-[#526446] animate-pulse" />
@@ -141,7 +140,7 @@ export default function DownloadItem({ task }: Props): React.JSX.Element {
       </div>
 
       {/* 操作按钮 */}
-      <div className="flex items-center gap-1 w-16 justify-end shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         {isCompleted && (
           <button
             onClick={() => window.api.openPath(task.savePath)}
