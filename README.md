@@ -3,7 +3,7 @@
 <p align="center">
   <img alt="version" src="https://img.shields.io/github/v/release/luferChan/dmhy-desktop?style=flat-square&label=version">
   <img alt="platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue?style=flat-square">
-  <img alt="electron" src="https://img.shields.io/badge/Electron-39.2.6-47848F?style=flat-square&logo=electron">
+  <img alt="electron" src="https://img.shields.io/badge/Electron-39.8.8-47848F?style=flat-square&logo=electron">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
 </p>
 
