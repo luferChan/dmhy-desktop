@@ -1,7 +1,16 @@
 import { create } from 'zustand'
-import type { Resource, DownloadTask, AppSettings } from '../types'
+import type {
+  Resource,
+  DownloadTask,
+  AppSettings,
+  SearchSource,
+  BangumiSection,
+  Bangumi,
+  MikanView
+} from '../types'
 
 interface SearchState {
+  source: SearchSource
   keyword: string
   results: Resource[]
   page: number
@@ -12,6 +21,13 @@ interface SearchState {
   activeTeamName: string | null
   favoritePublishers: string[]
   publisherSnapshot: Array<[string, { teamId: string; count: number }]>
+  // Mikan-specific schedule view state
+  mikanView: MikanView
+  schedule: BangumiSection[]
+  activeDayOfWeek: string | null
+  activeBangumi: Bangumi | null
+  bangumiResources: Resource[]
+  setSource: (s: SearchSource) => void
   setKeyword: (k: string) => void
   setResults: (r: Resource[], page: number, hasMore: boolean, append: boolean) => void
   setLoading: (v: boolean) => void
@@ -21,6 +37,11 @@ interface SearchState {
   setFavoritePublishers: (list: string[]) => void
   toggleFavoritePublisher: (p: string) => void
   updatePublisherSnapshot: (resources: Resource[], append: boolean) => void
+  setMikanView: (v: MikanView) => void
+  setSchedule: (s: BangumiSection[]) => void
+  setActiveDayOfWeek: (d: string | null) => void
+  setActiveBangumi: (b: Bangumi | null) => void
+  setBangumiResources: (r: Resource[]) => void
 }
 
 interface DownloadState {
@@ -38,6 +59,7 @@ interface SettingsState {
 }
 
 export const useSearchStore = create<SearchState>((set) => ({
+  source: 'mikan',
   keyword: '',
   results: [],
   page: 1,
@@ -48,8 +70,19 @@ export const useSearchStore = create<SearchState>((set) => ({
   activeTeamName: null,
   favoritePublishers: [],
   publisherSnapshot: [],
+  mikanView: 'schedule',
+  schedule: [],
+  activeDayOfWeek: null,
+  activeBangumi: null,
+  bangumiResources: [],
 
+  setSource: (source) => set({ source }),
   setKeyword: (keyword) => set({ keyword }),
+  setMikanView: (mikanView) => set({ mikanView }),
+  setSchedule: (schedule) => set({ schedule }),
+  setActiveDayOfWeek: (activeDayOfWeek) => set({ activeDayOfWeek }),
+  setActiveBangumi: (activeBangumi) => set({ activeBangumi }),
+  setBangumiResources: (bangumiResources) => set({ bangumiResources }),
   setResults: (resources, page, hasMore, append) =>
     set((s) => ({
       results: append ? [...s.results, ...resources] : resources,
@@ -70,7 +103,9 @@ export const useSearchStore = create<SearchState>((set) => ({
     }),
   updatePublisherSnapshot: (resources, append) =>
     set((s) => {
-      const map = new Map<string, { teamId: string; count: number }>(append ? s.publisherSnapshot : [])
+      const map = new Map<string, { teamId: string; count: number }>(
+        append ? s.publisherSnapshot : []
+      )
       for (const r of resources) {
         if (r.publisher && r.teamId) {
           const existing = map.get(r.publisher)
@@ -111,8 +146,7 @@ export const useDownloadStore = create<DownloadState>((set) => ({
       next.delete(id)
       return { tasks: next }
     }),
-  setTasks: (tasks) =>
-    set({ tasks: new Map(tasks.map((t) => [t.id, t])) })
+  setTasks: (tasks) => set({ tasks: new Map(tasks.map((t) => [t.id, t])) })
 }))
 
 export const useSettingsStore = create<SettingsState>((set) => ({

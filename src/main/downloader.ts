@@ -38,6 +38,11 @@ export interface DownloadTask {
   addedAt: number
   startedAt?: number
   completedAt?: number
+  // The .torrent file that aria2 downloaded as the prelude to this BT task
+  // (only populated when the source was an HTTP .torrent URL, not a magnet).
+  torrentFilePath?: string
+  // Whether to fs.unlink torrentFilePath once the BT side reaches 'completed'.
+  deleteTorrentAfterComplete?: boolean
 }
 
 const RPC_PORT = 16800
@@ -172,8 +177,11 @@ class Downloader extends EventEmitter {
         const gid: string = item.gid
         if (!this.gidToTaskId.has(gid)) {
           const id = Date.now().toString(36) + Math.random().toString(36).slice(2)
-          const magnetUri: string =
-            item.bittorrent ? (item.infoHash ? `magnet:?xt=urn:btih:${item.infoHash}` : '') : ''
+          const magnetUri: string = item.bittorrent
+            ? item.infoHash
+              ? `magnet:?xt=urn:btih:${item.infoHash}`
+              : ''
+            : ''
           const task: DownloadTask = {
             id,
             magnetUrl: magnetUri,
@@ -220,7 +228,14 @@ class Downloader extends EventEmitter {
 
     // Strip system proxy env vars — we control proxy via --all-proxy
     const env = { ...process.env }
-    for (const k of ['all_proxy', 'ALL_PROXY', 'http_proxy', 'HTTP_PROXY', 'https_proxy', 'HTTPS_PROXY']) {
+    for (const k of [
+      'all_proxy',
+      'ALL_PROXY',
+      'http_proxy',
+      'HTTP_PROXY',
+      'https_proxy',
+      'HTTPS_PROXY'
+    ]) {
       delete env[k]
     }
 
@@ -286,10 +301,7 @@ class Downloader extends EventEmitter {
       let out = ''
       ps.stdout?.on('data', (d: Buffer) => (out += d.toString()))
       ps.on('close', () => {
-        const pids = out
-          .trim()
-          .split(/\s+/)
-          .filter(Boolean)
+        const pids = out.trim().split(/\s+/).filter(Boolean)
         for (const pid of pids) {
           const n = parseInt(pid, 10)
           if (n && n !== process.pid) {
@@ -357,9 +369,19 @@ class Downloader extends EventEmitter {
     // If this GID was superseded by a followedBy GID, skip progress updates
     if (this.taskIdToGid.get(taskId) !== gid) return
 
-    // Skip HTTP pre-torrent phase: aria2 downloads the .torrent file itself (no bittorrent field).
-    // Prevents a brief 100% flash before the real torrent GID takes over via followedBy.
-    if (!item.bittorrent) return
+    // HTTP pre-torrent phase: aria2 downloads the .torrent file itself (no bittorrent field).
+    // Capture its path so we can delete it after the BT side completes, then skip the rest —
+    // otherwise we'd flash 100% before the real torrent GID takes over via followedBy.
+    if (!item.bittorrent) {
+      if (!task.torrentFilePath && item.files?.[0]?.path) {
+        const p = item.files[0].path as string
+        if (p.toLowerCase().endsWith('.torrent')) {
+          task.torrentFilePath = p
+          cacheUpsert(taskId, gid, task)
+        }
+      }
+      return
+    }
 
     const totalLength = parseInt(item.totalLength || '0', 10)
     const completedLength = parseInt(item.completedLength || '0', 10)
@@ -427,6 +449,18 @@ class Downloader extends EventEmitter {
     cacheUpsert(taskId, gid, task)
 
     if (task.status === 'completed' && prevStatus !== 'completed') {
+      if (task.deleteTorrentAfterComplete && task.torrentFilePath) {
+        try {
+          if (fs.existsSync(task.torrentFilePath)) {
+            fs.unlinkSync(task.torrentFilePath)
+            this.log(`[aria2] cleaned up torrent file: ${task.torrentFilePath}`)
+          }
+        } catch (e) {
+          this.log(
+            `[aria2] failed to delete torrent file ${task.torrentFilePath}: ${(e as Error).message}`
+          )
+        }
+      }
       this.emit('task-completed', { ...task })
     } else if (task.status === 'error' && prevStatus !== 'error') {
       this.emit('task-error', { id: taskId, error: task.error })
@@ -492,7 +526,8 @@ class Downloader extends EventEmitter {
     magnetUrl: string,
     savePath?: string,
     prefillName?: string,
-    prefillSize?: string
+    prefillSize?: string,
+    deleteTorrentAfterComplete = false
   ): Promise<string> {
     const resolvedPath = savePath || this.downloadPath
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2)
@@ -514,7 +549,8 @@ class Downloader extends EventEmitter {
       savePath: resolvedPath,
       files: [],
       eta: 0,
-      addedAt: Date.now()
+      addedAt: Date.now(),
+      deleteTorrentAfterComplete
     }
     this.tasks.set(id, task)
     this.emit('task-added', { ...task })

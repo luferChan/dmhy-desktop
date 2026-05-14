@@ -1,11 +1,18 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+type SearchSource = 'dmhy' | 'mikan'
+
 const api = {
   // Search
-  search: (keyword: string, page: number, sortId: number, teamId?: string) =>
-    ipcRenderer.invoke('search', keyword, page, sortId, teamId),
-  getMagnet: (detailUrl: string) => ipcRenderer.invoke('get-magnet', detailUrl),
+  search: (source: SearchSource, keyword: string, page: number, sortId: number, teamId?: string) =>
+    ipcRenderer.invoke('search', source, keyword, page, sortId, teamId),
+  getMagnet: (source: SearchSource, detailUrl: string) =>
+    ipcRenderer.invoke('get-magnet', source, detailUrl),
+
+  // Mikan-only views
+  getMikanSchedule: () => ipcRenderer.invoke('mikan-schedule'),
+  getMikanBangumi: (bangumiId: string) => ipcRenderer.invoke('mikan-bangumi', bangumiId),
 
   // Clipboard & shell
   copyText: (text: string) => ipcRenderer.invoke('copy-text', text),
@@ -13,7 +20,25 @@ const api = {
   openPath: (p: string) => ipcRenderer.invoke('open-path', p),
 
   // Downloads
-  downloadAdd: (url: string, title?: string, size?: string, detailUrl?: string, savePath?: string) => ipcRenderer.invoke('download-add', url, title, size, detailUrl, savePath),
+  downloadAdd: (
+    source: SearchSource,
+    url: string,
+    title?: string,
+    size?: string,
+    detailUrl?: string,
+    savePath?: string,
+    deleteTorrentAfterComplete?: boolean
+  ) =>
+    ipcRenderer.invoke(
+      'download-add',
+      source,
+      url,
+      title,
+      size,
+      detailUrl,
+      savePath,
+      deleteTorrentAfterComplete
+    ),
   downloadPause: (id: string) => ipcRenderer.invoke('download-pause', id),
   downloadResume: (id: string) => ipcRenderer.invoke('download-resume', id),
   downloadRemove: (id: string, deleteFiles: boolean) =>
@@ -22,7 +47,13 @@ const api = {
 
   // Download events
   onDownloadEvent: (
-    channel: 'task-added' | 'task-updated' | 'task-progress' | 'task-completed' | 'task-error' | 'task-removed',
+    channel:
+      | 'task-added'
+      | 'task-updated'
+      | 'task-progress'
+      | 'task-completed'
+      | 'task-error'
+      | 'task-removed',
     cb: (data: unknown) => void
   ) => {
     const fullChannel = `download:${channel}`

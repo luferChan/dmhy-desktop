@@ -3,7 +3,8 @@ import { Folder, FolderOpen, Leaf } from 'lucide-react'
 
 interface Props {
   defaultPath: string
-  onConfirm: (path: string, suppress: boolean) => void
+  defaultDeleteTorrent: boolean
+  onConfirm: (path: string, suppress: boolean, deleteTorrent: boolean) => void
   onCancel: () => void
 }
 
@@ -14,9 +15,15 @@ function truncatePath(p: string): string {
   return sep + '...' + sep + parts.slice(-2).join(sep)
 }
 
-export default function DownloadPathPicker({ defaultPath, onConfirm, onCancel }: Props): React.JSX.Element {
+export default function DownloadPathPicker({
+  defaultPath,
+  defaultDeleteTorrent,
+  onConfirm,
+  onCancel
+}: Props): React.JSX.Element {
   const [path, setPath] = useState(defaultPath)
   const [suppress, setSuppress] = useState(false)
+  const [deleteTorrent, setDeleteTorrent] = useState(defaultDeleteTorrent)
 
   async function handleChangePath(): Promise<void> {
     const result = await window.api.selectFolder()
@@ -57,16 +64,27 @@ export default function DownloadPathPicker({ defaultPath, onConfirm, onCancel }:
           </button>
         </div>
 
-        {/* 7天不再询问 */}
-        <label className="flex items-center gap-2.5 cursor-pointer select-none px-1">
-          <input
-            type="checkbox"
-            checked={suppress}
-            onChange={(e) => setSuppress(e.target.checked)}
-            className="w-3.5 h-3.5 accent-[#526446] cursor-pointer rounded"
-          />
-          <span className="text-xs text-[#5e605b]">7天内不再询问</span>
-        </label>
+        {/* 选项 */}
+        <div className="flex flex-col gap-2 px-1">
+          <label className="flex items-center gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={deleteTorrent}
+              onChange={(e) => setDeleteTorrent(e.target.checked)}
+              className="w-3.5 h-3.5 accent-[#526446] cursor-pointer rounded"
+            />
+            <span className="text-xs text-[#5e605b]">下载完成后删除 torrent 文件</span>
+          </label>
+          <label className="flex items-center gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={suppress}
+              onChange={(e) => setSuppress(e.target.checked)}
+              className="w-3.5 h-3.5 accent-[#526446] cursor-pointer rounded"
+            />
+            <span className="text-xs text-[#5e605b]">7天内不再询问</span>
+          </label>
+        </div>
 
         {/* 提示 */}
         <div className="flex items-center gap-2 p-3 bg-[#f6fed3]/50 rounded-xl">
@@ -83,7 +101,7 @@ export default function DownloadPathPicker({ defaultPath, onConfirm, onCancel }:
             取消
           </button>
           <button
-            onClick={() => onConfirm(path, suppress)}
+            onClick={() => onConfirm(path, suppress, deleteTorrent)}
             className="px-5 py-2 rounded-full text-sm font-semibold bg-[#526446] text-white hover:bg-[#47583b] transition-colors duration-200 cursor-pointer shadow-sm"
           >
             开始下载

@@ -1,3 +1,26 @@
+export type SearchSource = 'dmhy' | 'mikan'
+
+export const SEARCH_SOURCES: Array<{ id: SearchSource; label: string }> = [
+  { id: 'mikan', label: '蜜柑计划' },
+  { id: 'dmhy', label: '动漫花园' }
+]
+
+export type MikanView = 'schedule' | 'bangumi' | 'list'
+
+export interface Bangumi {
+  id: string
+  name: string
+  poster: string
+  lastUpdate: string
+  dayOfWeek: string
+}
+
+export interface BangumiSection {
+  dayOfWeek: string
+  label: string
+  bangumis: Bangumi[]
+}
+
 export interface Resource {
   id: string
   title: string
@@ -35,6 +58,8 @@ export interface DownloadTask {
   addedAt: number
   startedAt?: number
   completedAt?: number
+  torrentFilePath?: string
+  deleteTorrentAfterComplete?: boolean
 }
 
 export interface AppSettings {
@@ -46,6 +71,7 @@ export interface AppSettings {
   favoritePublishers: string[]
   lastUsedDownloadPath: string
   suppressDownloadPickerUntil: number
+  deleteTorrentAfterComplete: boolean
 }
 
 export const CATEGORIES = [

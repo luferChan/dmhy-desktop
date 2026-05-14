@@ -1,5 +1,21 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
+export type SearchSource = 'dmhy' | 'mikan'
+
+export interface Bangumi {
+  id: string
+  name: string
+  poster: string
+  lastUpdate: string
+  dayOfWeek: string
+}
+
+export interface BangumiSection {
+  dayOfWeek: string
+  label: string
+  bangumis: Bangumi[]
+}
+
 export interface Resource {
   id: string
   title: string
@@ -37,6 +53,8 @@ export interface DownloadTask {
   addedAt: number
   startedAt?: number
   completedAt?: number
+  torrentFilePath?: string
+  deleteTorrentAfterComplete?: boolean
 }
 
 export interface AppSettings {
@@ -48,18 +66,35 @@ export interface AppSettings {
   favoritePublishers: string[]
   lastUsedDownloadPath: string
   suppressDownloadPickerUntil: number
+  deleteTorrentAfterComplete: boolean
 }
 
 declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      search(keyword: string, page: number, sortId: number, teamId?: string): Promise<SearchResult>
-      getMagnet(detailUrl: string): Promise<string>
+      search(
+        source: SearchSource,
+        keyword: string,
+        page: number,
+        sortId: number,
+        teamId?: string
+      ): Promise<SearchResult>
+      getMagnet(source: SearchSource, detailUrl: string): Promise<string>
+      getMikanSchedule(): Promise<BangumiSection[]>
+      getMikanBangumi(bangumiId: string): Promise<{ name: string; resources: Resource[] }>
       copyText(text: string): Promise<boolean>
       openExternal(url: string): Promise<void>
       openPath(p: string): Promise<void>
-      downloadAdd(url: string, title?: string, size?: string, detailUrl?: string, savePath?: string): Promise<string>
+      downloadAdd(
+        source: SearchSource,
+        url: string,
+        title?: string,
+        size?: string,
+        detailUrl?: string,
+        savePath?: string,
+        deleteTorrentAfterComplete?: boolean
+      ): Promise<string>
       downloadPause(id: string): Promise<void>
       downloadResume(id: string): Promise<void>
       downloadRemove(id: string, deleteFiles: boolean): Promise<void>

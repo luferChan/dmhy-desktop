@@ -35,6 +35,7 @@ A desktop client for [dmhy.org](https://dmhy.org) — search and download anime 
 
 ### Recent updates
 
+- **v1.1.0** — Added Mikan Project as a second search source with toggle (default); bangumi schedule view by day-of-week as the empty-keyword landing for Mikan; click a bangumi to see its full episode list; subtitle-group filter parses the `[Group]` prefix and works in both modes; download dialog gains a "delete .torrent file when finished" option (default on) that persists in settings
 - **v1.0.4** — macOS 26 (Tahoe) compatibility: Electron upgraded to 39.8.8, ad-hoc re-signing applied to all bundle binaries; download list column alignment fixed; window drag region extended to content-area headers; redundant download percentage removed
 - **v1.0.3** — Empty keyword search support; back-to-top button (appears after scrolling 300 px); simplified publisher group filter; wider scrollbars
 - **v1.0.2** — Full UI redesign: "Botanical Atelier" design system (sage green + warm paper white), two-column card grid, redesigned sidebar with text labels, Bento-grid settings layout
@@ -161,6 +162,7 @@ All app data is stored in the OS user data directory (`app.getPath('userData')`)
 
 | Version | Highlights |
 |---------|------------|
+| **v1.1.0** | Mikan Project source · bangumi schedule view · subtitle-group prefix filter · auto-delete .torrent on finish |
 | **v1.0.4** | macOS 26 compatibility fix · download list column alignment · window drag region expanded · UI polish |
 | **v1.0.3** | Empty keyword search · back-to-top button · simplified publisher filter · wider scrollbars |
 | **v1.0.2** | "Botanical Atelier" UI redesign · two-column card grid · Bento settings · new sidebar |

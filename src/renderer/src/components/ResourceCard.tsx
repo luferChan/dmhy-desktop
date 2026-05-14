@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import { Copy, Download, ExternalLink, Check, Clock, HardDrive, User } from 'lucide-react'
 import type { Resource } from '../types'
+import { useSearchStore } from '../store'
 
 interface Props {
   resource: Resource
@@ -11,12 +12,12 @@ interface Props {
 type CategoryStyle = { bg: string; text: string; iconBg: string }
 
 const CATEGORY_STYLES: Record<string, CategoryStyle> = {
-  '動畫': { bg: 'bg-[#d4e9c3]', text: 'text-[#45573a]', iconBg: 'bg-[#d4e9c3]' },
-  '漫畫': { bg: 'bg-[#fadec1]', text: 'text-[#614e39]', iconBg: 'bg-[#fadec1]' },
-  '音樂': { bg: 'bg-[#f6fed3]', text: 'text-[#495031]', iconBg: 'bg-[#f6fed3]' },
-  '日劇': { bg: 'bg-[#fde8d8]', text: 'text-[#7c4028]', iconBg: 'bg-[#fde8d8]' },
-  '遊戲': { bg: 'bg-[#e8d4e9]', text: 'text-[#5e3d6e]', iconBg: 'bg-[#e8d4e9]' },
-  '其他': { bg: 'bg-[#e9e8e3]', text: 'text-[#5e605b]', iconBg: 'bg-[#e9e8e3]' },
+  動畫: { bg: 'bg-[#d4e9c3]', text: 'text-[#45573a]', iconBg: 'bg-[#d4e9c3]' },
+  漫畫: { bg: 'bg-[#fadec1]', text: 'text-[#614e39]', iconBg: 'bg-[#fadec1]' },
+  音樂: { bg: 'bg-[#f6fed3]', text: 'text-[#495031]', iconBg: 'bg-[#f6fed3]' },
+  日劇: { bg: 'bg-[#fde8d8]', text: 'text-[#7c4028]', iconBg: 'bg-[#fde8d8]' },
+  遊戲: { bg: 'bg-[#e8d4e9]', text: 'text-[#5e3d6e]', iconBg: 'bg-[#e8d4e9]' },
+  其他: { bg: 'bg-[#e9e8e3]', text: 'text-[#5e605b]', iconBg: 'bg-[#e9e8e3]' }
 }
 
 function getCategoryStyle(cat: string): CategoryStyle {
@@ -27,6 +28,7 @@ function getCategoryStyle(cat: string): CategoryStyle {
 }
 
 export default function ResourceCard({ resource, onDownload }: Props): React.JSX.Element {
+  const source = useSearchStore((s) => s.source)
   const [copied, setCopied] = useState(false)
   const [loadingMagnet, setLoadingMagnet] = useState(false)
   const [magnet, setMagnet] = useState(resource.magnetUrl || '')
@@ -37,7 +39,7 @@ export default function ResourceCard({ resource, onDownload }: Props): React.JSX
     if (magnet) return magnet
     setLoadingMagnet(true)
     try {
-      const url = await window.api.getMagnet(resource.detailUrl)
+      const url = await window.api.getMagnet(source, resource.detailUrl)
       setMagnet(url)
       return url
     } finally {
@@ -67,7 +69,9 @@ export default function ResourceCard({ resource, onDownload }: Props): React.JSX
     <div className="group bg-white rounded-xl border border-[#b2b2ad]/10 p-4 flex flex-col gap-3 hover:shadow-[0_4px_20px_-4px_rgba(82,100,70,0.10)] transition-all duration-300 cursor-default">
       {/* 顶部：图标 + 操作按钮 */}
       <div className="flex items-start justify-between">
-        <div className={`w-10 h-10 rounded-lg ${style.iconBg} flex items-center justify-center shrink-0`}>
+        <div
+          className={`w-10 h-10 rounded-lg ${style.iconBg} flex items-center justify-center shrink-0`}
+        >
           <Download size={16} className={style.text} />
         </div>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
@@ -124,7 +128,9 @@ export default function ResourceCard({ resource, onDownload }: Props): React.JSX
             </span>
           )}
           {resource.category && (
-            <span className={`inline-flex w-fit text-[10px] font-bold uppercase tracking-wide ${style.text} mt-1`}>
+            <span
+              className={`inline-flex w-fit text-[10px] font-bold uppercase tracking-wide ${style.text} mt-1`}
+            >
               # {resource.category}
             </span>
           )}

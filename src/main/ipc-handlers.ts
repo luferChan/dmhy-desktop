@@ -1,16 +1,46 @@
 import { ipcMain, BrowserWindow, shell, clipboard } from 'electron'
 import { searchResources, getResourceDetail, getResourceFiles, setScraperProxy } from './scraper'
+import {
+  searchMikanResources,
+  getMikanDetail,
+  getMikanFiles,
+  setMikanProxy,
+  getMikanSchedule,
+  getMikanBangumi
+} from './mikan-scraper'
 import { downloader } from './downloader'
 import { loadSettings, saveSettings } from './store'
 
+type SearchSource = 'dmhy' | 'mikan'
+
 export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   // ── Search ──────────────────────────────────────────────────────────────
-  ipcMain.handle('search', async (_e, keyword: string, page: number, sortId: number, teamId?: string) => {
-    return searchResources(keyword, page, sortId, teamId)
+  ipcMain.handle(
+    'search',
+    async (
+      _e,
+      source: SearchSource,
+      keyword: string,
+      page: number,
+      sortId: number,
+      teamId?: string
+    ) => {
+      if (source === 'mikan') return searchMikanResources(keyword, page)
+      return searchResources(keyword, page, sortId, teamId)
+    }
+  )
+
+  ipcMain.handle('get-magnet', async (_e, source: SearchSource, detailUrl: string) => {
+    if (source === 'mikan') return getMikanDetail(detailUrl)
+    return getResourceDetail(detailUrl)
   })
 
-  ipcMain.handle('get-magnet', async (_e, detailUrl: string) => {
-    return getResourceDetail(detailUrl)
+  ipcMain.handle('mikan-schedule', async () => {
+    return getMikanSchedule()
+  })
+
+  ipcMain.handle('mikan-bangumi', async (_e, bangumiId: string) => {
+    return getMikanBangumi(bangumiId)
   })
 
   // ── Clipboard ───────────────────────────────────────────────────────────
@@ -29,22 +59,42 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   })
 
   // ── Downloads ───────────────────────────────────────────────────────────
-  ipcMain.handle('download-add', async (_e, url: string, title?: string, size?: string, detailUrl?: string, savePath?: string) => {
-    const settings = loadSettings()
-    const id = await downloader.add(url, savePath || settings.downloadPath, title, size)
-    if (detailUrl) {
-      // Background: fetch file list to get actual filename; don't block task creation
-      const sizeOnly = /^\d+(\.\d+)?\s*(B|KB|MB|GB|TB|KiB|MiB|GiB|TiB)i?$/i
-      getResourceFiles(detailUrl).then((files) => {
-        if (files.length === 1 && !sizeOnly.test(files[0].trim())) {
-          // Single file — use exact filename
-          downloader.updateTaskName(id, files[0])
-        }
-        // Multiple files — keep search title; aria2 will set bittorrent.info.name later
-      }).catch(() => {})
+  ipcMain.handle(
+    'download-add',
+    async (
+      _e,
+      source: SearchSource,
+      url: string,
+      title?: string,
+      size?: string,
+      detailUrl?: string,
+      savePath?: string,
+      deleteTorrentAfterComplete?: boolean
+    ) => {
+      const settings = loadSettings()
+      const deleteFlag = deleteTorrentAfterComplete ?? settings.deleteTorrentAfterComplete ?? true
+      const id = await downloader.add(
+        url,
+        savePath || settings.downloadPath,
+        title,
+        size,
+        deleteFlag
+      )
+      if (detailUrl) {
+        // Background: fetch file list to get actual filename; don't block task creation
+        const sizeOnly = /^\d+(\.\d+)?\s*(B|KB|MB|GB|TB|KiB|MiB|GiB|TiB)i?$/i
+        const fetcher = source === 'mikan' ? getMikanFiles : getResourceFiles
+        fetcher(detailUrl)
+          .then((files) => {
+            if (files.length === 1 && !sizeOnly.test(files[0].trim())) {
+              downloader.updateTaskName(id, files[0])
+            }
+          })
+          .catch(() => {})
+      }
+      return id
     }
-    return id
-  })
+  )
 
   ipcMain.handle('download-pause', (_e, id: string) => {
     downloader.pause(id)
@@ -80,20 +130,36 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   })
 
   // Forward download events to renderer
-  downloader.on('task-added', (task) => { send('download:task-added', task) })
-  downloader.on('task-updated', (task) => { send('download:task-updated', task) })
-  downloader.on('task-progress', (data) => { send('download:task-progress', data) })
-  downloader.on('task-completed', (task) => { send('download:task-completed', task) })
-  downloader.on('task-error', (data) => { send('download:task-error', data) })
-  downloader.on('task-removed', (data) => { send('download:task-removed', data) })
+  downloader.on('task-added', (task) => {
+    send('download:task-added', task)
+  })
+  downloader.on('task-updated', (task) => {
+    send('download:task-updated', task)
+  })
+  downloader.on('task-progress', (data) => {
+    send('download:task-progress', data)
+  })
+  downloader.on('task-completed', (task) => {
+    send('download:task-completed', task)
+  })
+  downloader.on('task-error', (data) => {
+    send('download:task-error', data)
+  })
+  downloader.on('task-removed', (data) => {
+    send('download:task-removed', data)
+  })
 
   // ── Window controls ──────────────────────────────────────────────────────
-  ipcMain.handle('window-minimize', () => { mainWindow.minimize() })
+  ipcMain.handle('window-minimize', () => {
+    mainWindow.minimize()
+  })
   ipcMain.handle('window-maximize', () => {
     if (mainWindow.isMaximized()) mainWindow.unmaximize()
     else mainWindow.maximize()
   })
-  ipcMain.handle('window-close', () => { mainWindow.close() })
+  ipcMain.handle('window-close', () => {
+    mainWindow.close()
+  })
   ipcMain.handle('window-is-maximized', () => mainWindow.isMaximized())
 
   // ── Settings ─────────────────────────────────────────────────────────────
@@ -107,6 +173,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     downloader.setProxyUrl(settings.proxyUrl || '')
     downloader.setSeedAfterDownload(settings.seedAfterDownload ?? false)
     setScraperProxy(settings.proxyUrl || '')
+    setMikanProxy(settings.proxyUrl || '')
     return true
   })
 

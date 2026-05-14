@@ -6,6 +6,7 @@ import { registerIpcHandlers } from './ipc-handlers'
 import { downloader } from './downloader'
 import { loadSettings } from './store'
 import { setScraperProxy } from './scraper'
+import { setMikanProxy } from './mikan-scraper'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -61,6 +62,7 @@ app.whenReady().then(async () => {
   downloader.setProxyUrl(settings.proxyUrl || '')
   downloader.setSeedAfterDownload(settings.seedAfterDownload ?? false)
   setScraperProxy(settings.proxyUrl || '')
+  setMikanProxy(settings.proxyUrl || '')
 
   // Create window immediately; aria2 starts in background
   createWindow()

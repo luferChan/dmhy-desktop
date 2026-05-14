@@ -11,6 +11,7 @@ export interface AppSettings {
   favoritePublishers: string[]
   lastUsedDownloadPath: string
   suppressDownloadPickerUntil: number
+  deleteTorrentAfterComplete: boolean
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -21,7 +22,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   searchHistory: [],
   favoritePublishers: [],
   lastUsedDownloadPath: '',
-  suppressDownloadPickerUntil: 0
+  suppressDownloadPickerUntil: 0,
+  deleteTorrentAfterComplete: true
 }
 
 function getStorePath(): string {
