@@ -25,8 +25,9 @@ A desktop client for [dmhy.org](https://dmhy.org) — search and download anime 
 
 ### Core
 
-- **Search** — Search anime resources by keyword with category filters (Anime, J-Drama, RAW, etc.) and publisher group filtering
-- **One-click download** — Prefers `.torrent` files for fast metadata resolution, falls back to Magnet links automatically
+- **Search across two sources** — dmhy.org (with category filters: Anime, J-Drama, RAW, etc.) and the new Mikan Project (`mikanani.me`). One-click toggle in the search header. Subtitle-group filter parses the `[Group]` title prefix and works on both sources.
+- **Bangumi schedule view (Mikan)** — With an empty keyword, the landing page is a weekly schedule grid: posters arranged by day-of-week (plus Movies / OVA). Click any bangumi to see every subtitle group's full release list.
+- **One-click download** — Prefers `.torrent` files for fast metadata resolution, falls back to Magnet links automatically. Optional auto-cleanup of the intermediate `.torrent` file once the BT side completes (toggle in the download dialog, default on).
 - **Download management** — Real-time progress, speed, and ETA display; pause / resume / remove tasks (with optional local file deletion)
 - **Seeding control** — Choose to keep seeding after completion or stop immediately to save bandwidth
 - **Proxy support** — A single HTTP proxy setting covers both web scraping and all BitTorrent traffic via aria2
