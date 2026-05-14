@@ -7,7 +7,7 @@
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
 </p>
 
-A desktop client for [dmhy.org](https://dmhy.org) — search and download anime torrents with a clean, modern UI, powered by the aria2 download engine.
+A desktop client for anime torrents from [Mikan Project](https://mikanani.me) and [dmhy.org](https://dmhy.org) — one-click source toggle, weekly bangumi schedule, clean UI, powered by the aria2 download engine.
 
 > 中文文档请见 [README_CN.md](./README_CN.md)
 

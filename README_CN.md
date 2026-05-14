@@ -7,7 +7,7 @@
   <img alt="license" src="https://img.shields.io/badge/许可证-MIT-green?style=flat-square">
 </p>
 
-动漫花园 [dmhy.org](https://dmhy.org) 的桌面客户端，支持搜索、一键下载种子资源，内置 aria2 下载引擎，界面清爽美观。
+动漫种子桌面客户端——「蜜柑计划」[mikanani.me](https://mikanani.me) 与「动漫花园」[dmhy.org](https://dmhy.org) 一键切换，番组周表浏览，内置 aria2 下载引擎，界面清爽。
 
 > English documentation: [README.md](./README.md)
 
