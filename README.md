@@ -36,6 +36,7 @@ A desktop client for anime torrents from [Mikan Project](https://mikanani.me) an
 
 ### Recent updates
 
+- **v1.2.0** — Intel Mac support dropped; macOS builds are arm64 only. Fixes a download failure on Apple Silicon caused by an x86_64 aria2c being bundled inside the arm64 DMG (RPC port 16800 never came up)
 - **v1.1.0** — Added Mikan Project as a second search source with toggle (default); bangumi schedule view by day-of-week as the empty-keyword landing for Mikan; click a bangumi to see its full episode list; subtitle-group filter parses the `[Group]` prefix and works in both modes; download dialog gains a "delete .torrent file when finished" option (default on) that persists in settings
 - **v1.0.4** — macOS 26 (Tahoe) compatibility: Electron upgraded to 39.8.8, ad-hoc re-signing applied to all bundle binaries; download list column alignment fixed; window drag region extended to content-area headers; redundant download percentage removed
 - **v1.0.3** — Empty keyword search support; back-to-top button (appears after scrolling 300 px); simplified publisher group filter; wider scrollbars
@@ -52,8 +53,7 @@ Head to the [Releases](../../releases) page and grab the installer for your plat
 |----------|------|-------|
 | Windows | `dmhy-desktop-*-setup.exe` | NSIS installer (recommended) |
 | Windows | `dmhy-desktop-*-portable.exe` | No-install portable executable |
-| macOS (Intel) | `dmhy-desktop-*-x64.dmg` | x64 |
-| macOS (Apple Silicon) | `dmhy-desktop-*-arm64.dmg` | arm64 |
+| macOS (Apple Silicon) | `dmhy-desktop-*-arm64.dmg` | arm64 only — Intel Macs are no longer supported from v1.2.0 |
 
 > **macOS Gatekeeper warning ("unverified developer")**: Open **System Settings → Privacy & Security** and click **Open Anyway**.
 
@@ -97,7 +97,7 @@ npm run dev
 | Script | Description |
 |--------|-------------|
 | `npm run dev` | Start with hot-reload |
-| `npm run build:mac` | Build macOS DMG (Intel + Apple Silicon) |
+| `npm run build:mac` | Build macOS DMG (Apple Silicon only) |
 | `npm run build:win` | Build Windows NSIS installer + portable |
 | `npm run typecheck` | TypeScript type check |
 | `npm run lint` | ESLint |
@@ -137,7 +137,7 @@ Production builds ship with pre-compiled aria2 executables:
 | Platform | Path | Source |
 |----------|------|--------|
 | Windows | `resources/aria2c.exe` | aria2 official release v1.37.0 |
-| macOS | `resources/aria2c` | Copied from Homebrew at build time |
+| macOS (arm64) | `resources/aria2c` | Copied from Apple Silicon Homebrew at build time |
 
 Before building for macOS, ensure `resources/aria2c` is in place:
 
@@ -163,6 +163,7 @@ All app data is stored in the OS user data directory (`app.getPath('userData')`)
 
 | Version | Highlights |
 |---------|------------|
+| **v1.2.0** | Dropped Intel Mac support — macOS builds are arm64 only (fixes aria2c spawn failure on Apple Silicon when bundled with x86_64 binary) |
 | **v1.1.0** | Mikan Project source · bangumi schedule view · subtitle-group prefix filter · auto-delete .torrent on finish |
 | **v1.0.4** | macOS 26 compatibility fix · download list column alignment · window drag region expanded · UI polish |
 | **v1.0.3** | Empty keyword search · back-to-top button · simplified publisher filter · wider scrollbars |

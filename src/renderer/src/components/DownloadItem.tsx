@@ -4,6 +4,7 @@ import type { DownloadTask } from '../types'
 
 interface Props {
   task: DownloadTask
+  onRequestRemove: (task: DownloadTask) => void
 }
 
 function formatBytes(bytes: number): string {
@@ -31,7 +32,7 @@ function formatEta(seconds: number): string {
   return m > 0 ? `${h}h ${m}m` : `${h}h`
 }
 
-export default function DownloadItem({ task }: Props): React.JSX.Element {
+export default function DownloadItem({ task, onRequestRemove }: Props): React.JSX.Element {
   const isActive = task.status === 'downloading'
   const isSeeding = task.status === 'seeding'
   const isPaused = task.status === 'paused'
@@ -169,7 +170,7 @@ export default function DownloadItem({ task }: Props): React.JSX.Element {
           </button>
         )}
         <button
-          onClick={() => window.api.downloadRemove(task.id, task.status !== 'completed')}
+          onClick={() => onRequestRemove(task)}
           title="删除任务"
           className="flex items-center justify-center w-7 h-7 rounded-lg text-[#7a7b76] hover:bg-[#a73b21]/10 hover:text-[#a73b21] transition-all duration-150 cursor-pointer"
         >

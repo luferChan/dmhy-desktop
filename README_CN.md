@@ -36,6 +36,7 @@
 
 ### 近期版本新增
 
+- **v1.2.0** — 不再支持 Intel Mac，macOS 构建仅产出 arm64。修复 Apple Silicon 上因 arm64 DMG 内打包了 x86_64 aria2c 导致 RPC 端口 16800 起不来、下载全部失败的问题
 - **v1.1.0** — 新增「蜜柑计划」搜索源（默认源，可与动漫花园一键切换）；空关键词下进入「番组周表」视图，按播出星期分块展示番剧海报；点击番剧卡片查看该番剧全量剧集列表；字幕组前缀（`[字幕组]`）筛选在两种视图都生效；下载对话框新增「下载完成后删除 torrent 文件」选项（默认开启，持久化到设置）
 - **v1.0.4** — 修复 macOS 26 (Tahoe) 兼容性：Electron 升级至 39.8.8，对所有 bundle 二进制统一 ad-hoc 重签名；修复下载页列标题对齐；窗口拖拽区域扩展至内容区顶栏；移除冗余下载百分比显示
 - **v1.0.3** — 支持空关键词搜索；滚动超过 300px 后显示回到顶部按钮；简化发布组过滤交互；更宽的滚动条
@@ -52,8 +53,7 @@
 |------|------|------|
 | Windows | `dmhy-desktop-*-setup.exe` | NSIS 安装程序（推荐） |
 | Windows | `dmhy-desktop-*-portable.exe` | 免安装便携版 |
-| macOS (Intel) | `dmhy-desktop-*-x64.dmg` | x64 |
-| macOS (Apple Silicon) | `dmhy-desktop-*-arm64.dmg` | arm64 |
+| macOS (Apple Silicon) | `dmhy-desktop-*-arm64.dmg` | 仅 arm64 —— 自 v1.2.0 起不再支持 Intel Mac |
 
 > **macOS 首次打开提示「无法验证开发者」**：前往「系统设置 → 隐私与安全性」，点击「仍要打开」。
 
@@ -97,7 +97,7 @@ npm run dev
 | 脚本 | 说明 |
 |------|------|
 | `npm run dev` | 启动开发模式（热更新） |
-| `npm run build:mac` | 构建 macOS DMG（Intel + Apple Silicon） |
+| `npm run build:mac` | 构建 macOS DMG（仅 Apple Silicon） |
 | `npm run build:win` | 构建 Windows 安装包（NSIS + 便携版） |
 | `npm run typecheck` | TypeScript 类型检查 |
 | `npm run lint` | ESLint 代码检查 |
@@ -137,7 +137,7 @@ src/
 | 平台 | 路径 | 来源 |
 |------|------|------|
 | Windows | `resources/aria2c.exe` | aria2 官方 Release v1.37.0 |
-| macOS | `resources/aria2c` | 由构建机器的 Homebrew 复制 |
+| macOS (arm64) | `resources/aria2c` | 由 Apple Silicon Homebrew 复制 |
 
 macOS 构建前需确认 `resources/aria2c` 已就位，可使用以下脚本从 Homebrew 复制：
 
@@ -163,6 +163,7 @@ bash scripts/setup-aria2-mac.sh
 
 | 版本 | 主要更新 |
 |------|----------|
+| **v1.2.0** | 不再支持 Intel Mac — macOS 构建仅 arm64（修复 Apple Silicon 上 arm64 DMG 内嵌 x86_64 aria2c 导致下载失败的问题） |
 | **v1.1.0** | 蜜柑计划搜索源 · 番组周表视图 · 字幕组前缀筛选 · 下载完成自动清理 torrent |
 | **v1.0.4** | macOS 26 兼容性修复 · 下载列表列对齐修复 · 窗口拖拽区域扩展 · UI 细节优化 |
 | **v1.0.3** | 空关键词搜索 · 回到顶部按钮 · 简化发布组筛选 · 更宽滚动条 |

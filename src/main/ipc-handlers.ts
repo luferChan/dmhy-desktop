@@ -104,8 +104,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     downloader.resume(id)
   })
 
-  ipcMain.handle('download-remove', (_e, id: string, deleteFiles: boolean) => {
-    downloader.remove(id, deleteFiles)
+  ipcMain.handle('download-remove', async (_e, id: string, deleteFiles: boolean) => {
+    await downloader.remove(id, deleteFiles)
+  })
+
+  ipcMain.handle('download-files-exist', (_e, id: string) => {
+    return downloader.taskFilesExist(id)
   })
 
   ipcMain.handle('download-list', () => {

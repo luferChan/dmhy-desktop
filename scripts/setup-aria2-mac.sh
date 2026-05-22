@@ -17,4 +17,14 @@ fi
 
 cp "$ARIA2" resources/aria2c
 chmod +x resources/aria2c
-echo "Copied aria2c to resources/ from $ARIA2"
+
+ARCH_INFO=$(file -b resources/aria2c)
+if [[ "$ARCH_INFO" != *"arm64"* ]]; then
+  echo "Error: resources/aria2c is not arm64 (got: $ARCH_INFO)"
+  echo "This project ships arm64 macOS builds only. Install arm64 aria2c via Apple Silicon Homebrew:"
+  echo "  /opt/homebrew/bin/brew install aria2"
+  rm -f resources/aria2c
+  exit 1
+fi
+
+echo "Copied arm64 aria2c to resources/ from $ARIA2"

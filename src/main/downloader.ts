@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { app } from 'electron'
+import { app, shell } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import http from 'http'
@@ -366,22 +366,25 @@ class Downloader extends EventEmitter {
     const task = this.tasks.get(taskId)
     if (!task) return
 
-    // If this GID was superseded by a followedBy GID, skip progress updates
-    if (this.taskIdToGid.get(taskId) !== gid) return
-
     // HTTP pre-torrent phase: aria2 downloads the .torrent file itself (no bittorrent field).
-    // Capture its path so we can delete it after the BT side completes, then skip the rest —
-    // otherwise we'd flash 100% before the real torrent GID takes over via followedBy.
+    // Capture its path BEFORE the supersede guard below — a small .torrent can finish between
+    // two 1s polls, so by the time we first see this item it may already be 'complete' with
+    // followedBy registered, leaving its gid no longer the current taskIdToGid. The HTTP item
+    // is still our only source for the .torrent file path on disk.
     if (!item.bittorrent) {
       if (!task.torrentFilePath && item.files?.[0]?.path) {
         const p = item.files[0].path as string
         if (p.toLowerCase().endsWith('.torrent')) {
           task.torrentFilePath = p
-          cacheUpsert(taskId, gid, task)
+          const currentGid = this.taskIdToGid.get(taskId) || gid
+          cacheUpsert(taskId, currentGid, task)
         }
       }
       return
     }
+
+    // If this GID was superseded by a followedBy GID, skip BT progress updates.
+    if (this.taskIdToGid.get(taskId) !== gid) return
 
     const totalLength = parseInt(item.totalLength || '0', 10)
     const completedLength = parseInt(item.completedLength || '0', 10)
@@ -606,7 +609,7 @@ class Downloader extends EventEmitter {
     })
   }
 
-  remove(id: string, deleteFiles = false): void {
+  async remove(id: string, deleteFiles = false): Promise<void> {
     const gid = this.taskIdToGid.get(id)
     const task = this.tasks.get(id)
 
@@ -621,28 +624,42 @@ class Downloader extends EventEmitter {
     }
 
     if (deleteFiles && task) {
-      const torrentDir = path.join(task.savePath, task.name)
-      try {
-        if (fs.existsSync(torrentDir) && fs.statSync(torrentDir).isDirectory()) {
-          fs.rmSync(torrentDir, { recursive: true, force: true })
-          const aria2Ctrl = torrentDir + '.aria2'
-          if (fs.existsSync(aria2Ctrl)) fs.unlinkSync(aria2Ctrl)
-        } else {
-          for (const f of task.files) {
-            const fp = path.join(task.savePath, f.name)
-            if (fs.existsSync(fp)) fs.unlinkSync(fp)
-            const aria2Ctrl = fp + '.aria2'
-            if (fs.existsSync(aria2Ctrl)) fs.unlinkSync(aria2Ctrl)
-          }
+      const trashIfExists = async (p: string): Promise<void> => {
+        if (!fs.existsSync(p)) return
+        try {
+          await shell.trashItem(p)
+        } catch (e) {
+          this.log(`[downloader] trashItem failed for ${p}: ${(e as Error).message}`)
         }
-      } catch (e) {
-        console.error('[Downloader] failed to delete files:', e)
+      }
+
+      const torrentDir = path.join(task.savePath, task.name)
+      if (fs.existsSync(torrentDir) && fs.statSync(torrentDir).isDirectory()) {
+        await trashIfExists(torrentDir)
+        await trashIfExists(torrentDir + '.aria2')
+      } else {
+        for (const f of task.files) {
+          const fp = path.join(task.savePath, f.name)
+          await trashIfExists(fp)
+          await trashIfExists(fp + '.aria2')
+        }
       }
     }
 
     this.tasks.delete(id)
     cacheDelete(id)
     this.emit('task-removed', { id })
+  }
+
+  taskFilesExist(id: string): boolean {
+    const task = this.tasks.get(id)
+    if (!task) return false
+    const torrentDir = path.join(task.savePath, task.name)
+    if (fs.existsSync(torrentDir)) return true
+    for (const f of task.files) {
+      if (fs.existsSync(path.join(task.savePath, f.name))) return true
+    }
+    return false
   }
 
   async destroy(): Promise<void> {

@@ -17,7 +17,7 @@ Run from the `dmhy-desktop/` directory:
 | Lint (cached) | `npm run lint` |
 | Format | `npm run format` |
 | Production build (typecheck → electron-vite build) | `npm run build` |
-| macOS build (x64 + arm64 DMGs, requires `resources/aria2c`) | `npm run build:mac` |
+| macOS build (arm64 DMG only, requires `resources/aria2c`) | `npm run build:mac` |
 | Windows build (NSIS + portable) | `npm run build:win` |
 | Stage bundled macOS aria2 binary before first mac build | `bash scripts/setup-aria2-mac.sh` |
 

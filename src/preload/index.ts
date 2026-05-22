@@ -43,6 +43,8 @@ const api = {
   downloadResume: (id: string) => ipcRenderer.invoke('download-resume', id),
   downloadRemove: (id: string, deleteFiles: boolean) =>
     ipcRenderer.invoke('download-remove', id, deleteFiles),
+  downloadFilesExist: (id: string): Promise<boolean> =>
+    ipcRenderer.invoke('download-files-exist', id),
   downloadList: () => ipcRenderer.invoke('download-list'),
 
   // Download events

@@ -1,11 +1,26 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Download, Inbox } from 'lucide-react'
 import { useDownloadStore } from '../store'
 import DownloadItem from '../components/DownloadItem'
+import DeleteConfirmModal from '../components/DeleteConfirmModal'
+import type { DownloadTask } from '../types'
 
 export default function DownloadsPage(): React.JSX.Element {
   const tasks = useDownloadStore((s) => s.tasks)
   const taskList = Array.from(tasks.values()).sort((a, b) => b.addedAt - a.addedAt)
+  const [removeTarget, setRemoveTarget] = useState<{
+    task: DownloadTask
+    filesExist: boolean
+  } | null>(null)
+
+  async function handleRequestRemove(task: DownloadTask): Promise<void> {
+    if (task.status === 'completed') {
+      const filesExist = await window.api.downloadFilesExist(task.id)
+      setRemoveTarget({ task, filesExist })
+    } else {
+      window.api.downloadRemove(task.id, true)
+    }
+  }
 
   const active = taskList.filter(
     (t) => t.status === 'downloading' || t.status === 'waiting' || t.status === 'seeding'
@@ -16,6 +31,17 @@ export default function DownloadsPage(): React.JSX.Element {
 
   return (
     <div className="flex flex-col h-full">
+      {removeTarget && (
+        <DeleteConfirmModal
+          taskName={removeTarget.task.name}
+          filesExist={removeTarget.filesExist}
+          onConfirm={(deleteFiles) => {
+            window.api.downloadRemove(removeTarget.task.id, deleteFiles)
+            setRemoveTarget(null)
+          }}
+          onCancel={() => setRemoveTarget(null)}
+        />
+      )}
       {/* 粘性顶栏 */}
       <header className="drag-region sticky top-0 z-20 flex items-center justify-between px-8 h-16 bg-[#fbf9f5]/90 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
@@ -59,7 +85,7 @@ export default function DownloadsPage(): React.JSX.Element {
                     <span className="text-[10px] font-bold text-[#45573a] uppercase tracking-wider">进行中</span>
                   </div>
                 )}
-                {active.map((t) => <DownloadItem key={t.id} task={t} />)}
+                {active.map((t) => <DownloadItem key={t.id} task={t} onRequestRemove={handleRequestRemove} />)}
               </>
             )}
 
@@ -68,7 +94,7 @@ export default function DownloadsPage(): React.JSX.Element {
                 <div className="px-6 py-1.5 bg-[#a73b21]/5">
                   <span className="text-[10px] font-bold text-[#a73b21] uppercase tracking-wider">出错</span>
                 </div>
-                {errored.map((t) => <DownloadItem key={t.id} task={t} />)}
+                {errored.map((t) => <DownloadItem key={t.id} task={t} onRequestRemove={handleRequestRemove} />)}
               </>
             )}
 
@@ -77,7 +103,7 @@ export default function DownloadsPage(): React.JSX.Element {
                 <div className="px-6 py-1.5 bg-[#fadec1]/40">
                   <span className="text-[10px] font-bold text-[#614e39] uppercase tracking-wider">已暂停</span>
                 </div>
-                {paused.map((t) => <DownloadItem key={t.id} task={t} />)}
+                {paused.map((t) => <DownloadItem key={t.id} task={t} onRequestRemove={handleRequestRemove} />)}
               </>
             )}
 
@@ -86,7 +112,7 @@ export default function DownloadsPage(): React.JSX.Element {
                 <div className="px-6 py-1.5 bg-[#efeee9]/60">
                   <span className="text-[10px] font-bold text-[#5e605b] uppercase tracking-wider">已完成</span>
                 </div>
-                {completed.map((t) => <DownloadItem key={t.id} task={t} />)}
+                {completed.map((t) => <DownloadItem key={t.id} task={t} onRequestRemove={handleRequestRemove} />)}
               </>
             )}
           </div>

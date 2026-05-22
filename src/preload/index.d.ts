@@ -98,6 +98,7 @@ declare global {
       downloadPause(id: string): Promise<void>
       downloadResume(id: string): Promise<void>
       downloadRemove(id: string, deleteFiles: boolean): Promise<void>
+      downloadFilesExist(id: string): Promise<boolean>
       downloadList(): Promise<DownloadTask[]>
       onDownloadEvent(
         channel:
