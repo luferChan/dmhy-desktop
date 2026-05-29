@@ -1,6 +1,6 @@
 {
   "name": "dmhy-desktop",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "lufer.chen",
@@ -45,7 +45,10 @@
     },
     "win": {
       "extraResources": [
-        { "from": "resources/aria2c.exe", "to": "aria2c.exe" }
+        {
+          "from": "resources/aria2c.exe",
+          "to": "aria2c.exe"
+        }
       ],
       "target": [
         {
@@ -80,7 +83,10 @@
     },
     "mac": {
       "extraResources": [
-        { "from": "resources/aria2c", "to": "aria2c" }
+        {
+          "from": "resources/aria2c",
+          "to": "aria2c"
+        }
       ],
       "target": [
         {

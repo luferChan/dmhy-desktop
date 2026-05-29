@@ -7,6 +7,7 @@ import { useSearchStore } from '../store'
 interface Props {
   resource: Resource
   onDownload: (url: string, title: string, size: string, detailUrl: string) => void
+  compact?: boolean
 }
 
 type CategoryStyle = { bg: string; text: string; iconBg: string }
@@ -27,7 +28,7 @@ function getCategoryStyle(cat: string): CategoryStyle {
   return CATEGORY_STYLES['其他']
 }
 
-export default function ResourceCard({ resource, onDownload }: Props): React.JSX.Element {
+export default function ResourceCard({ resource, onDownload, compact }: Props): React.JSX.Element {
   const source = useSearchStore((s) => s.source)
   const [copied, setCopied] = useState(false)
   const [loadingMagnet, setLoadingMagnet] = useState(false)
@@ -63,6 +64,76 @@ export default function ResourceCard({ resource, onDownload }: Props): React.JSX
     const url = await ensureMagnet()
     if (!url) return
     onDownload(url, resource.title, resource.size, resource.detailUrl)
+  }
+
+  if (compact) {
+    return (
+      <div className="group bg-white rounded-lg border border-[#b2b2ad]/10 px-3.5 py-2.5 flex items-center gap-3 hover:shadow-[0_4px_20px_-4px_rgba(82,100,70,0.10)] transition-all duration-300">
+        {/* 左侧：标题 + 元信息 */}
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <p
+            className="font-headline text-[13px] font-bold text-[#31332f] leading-snug line-clamp-1 cursor-pointer hover:text-[#526446] transition-colors duration-150"
+            onClick={() => window.api.openExternal(resource.detailUrl)}
+            title={resource.title}
+          >
+            {resource.title}
+          </p>
+          <div className="flex items-center gap-2.5 text-[11px] text-[#7a7b76] flex-wrap">
+            {resource.publisher && (
+              <span className="flex items-center gap-1">
+                <User size={10} />
+                {resource.publisher}
+              </span>
+            )}
+            {resource.publishTime && (
+              <span className="flex items-center gap-1">
+                <Clock size={10} />
+                {resource.publishTime}
+              </span>
+            )}
+            {resource.size && (
+              <span className="flex items-center gap-1">
+                <HardDrive size={10} />
+                {resource.size}
+              </span>
+            )}
+            {resource.category && (
+              <span className={`text-[10px] font-bold uppercase tracking-wide ${style.text}`}>
+                # {resource.category}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* 右侧：操作按钮 */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button
+            onClick={handleCopy}
+            disabled={loadingMagnet}
+            title="复制磁力链接"
+            className="flex items-center justify-center w-7 h-7 rounded-full text-[#7a7b76] opacity-0 group-hover:opacity-100 hover:bg-[#f5f4ef] hover:text-[#526446] transition-all duration-150 cursor-pointer disabled:opacity-40"
+          >
+            {copied ? <Check size={13} className="text-[#526446]" /> : <Copy size={13} />}
+          </button>
+          <button
+            onClick={() => window.api.openExternal(resource.detailUrl)}
+            title="在浏览器中打开"
+            className="flex items-center justify-center w-7 h-7 rounded-full text-[#7a7b76] opacity-0 group-hover:opacity-100 hover:bg-[#f5f4ef] hover:text-[#526446] transition-all duration-150 cursor-pointer"
+          >
+            <ExternalLink size={13} />
+          </button>
+          <button
+            onClick={handleDownload}
+            disabled={loadingMagnet || (!magnet && resource.magnetUrl === '')}
+            title="开始下载"
+            className="flex items-center gap-1 text-[11px] font-bold text-[#526446] bg-[#526446]/10 px-2.5 py-1 rounded-full hover:bg-[#526446] hover:text-white transition-all duration-200 cursor-pointer disabled:opacity-40 ml-1"
+          >
+            <Download size={12} />
+            下载
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

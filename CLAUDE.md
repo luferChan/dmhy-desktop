@@ -68,6 +68,16 @@ Two `tsconfig` projects feed into `npm run typecheck`:
 
 `npm run build` runs typecheck first; a type error fails the build before `electron-vite build` runs.
 
+## Version bumping
+
+`package.json` `version` is the single source of truth. Bump it with `npm version <x.y.z> --no-git-tag-version` (run in `dmhy-desktop/`; the flag skips the git commit/tag). This updates **both** `package.json` and the root `version` in `package-lock.json` — keep them in sync.
+
+The version propagates automatically; do **not** hand-edit these:
+- **Settings page** (`src/renderer/src/pages/Settings.tsx`) renders `__APP_VERSION__`, injected from `package.json` at build time via the `define` in `electron.vite.config.ts`. It only reflects the new number after a rebuild (`npm run build` / `build:mac`), never in an already-running dev session.
+- **Packaged artifacts** — electron-builder reads `package.json` for the macOS app version (`CFBundleShortVersionString` / `CFBundleVersion`) and for the DMG/installer filename.
+
+Leave alone: the `v1.2.x` strings in `README.md` / `README_CN.md` are historical changelog entries, and the version badge is a dynamic shields.io image — neither tracks the current version, so don't rewrite them on a bump.
+
 ## Git commit style
 
 Commit messages should not include `Co-Authored-By: Claude` footers.

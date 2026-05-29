@@ -459,9 +459,18 @@ export default function SearchPage(): React.JSX.Element {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div
+                className={
+                  viewMode === 'bangumi' ? 'flex flex-col gap-2' : 'grid grid-cols-2 gap-3'
+                }
+              >
                 {filteredList.map((r) => (
-                  <ResourceCard key={r.id} resource={r} onDownload={handleDownload} />
+                  <ResourceCard
+                    key={r.id}
+                    resource={r}
+                    onDownload={handleDownload}
+                    compact={viewMode === 'bangumi'}
+                  />
                 ))}
               </div>
 
